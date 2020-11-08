@@ -138,6 +138,7 @@ int CTinit(void (*cmd)(char*)) {
 	CTcmdbufLen = CTmaxBufferSize+1;
 	memset(CTcmdbuf, 0, CTcmdbufLen);
 	CTcmdbufUsed = 0;
+	CTpromtupdate();
 	pthread_create(&CTreaderT, NULL, &CTreader, NULL);
 	CTinitDone = true;
 	return 0;
