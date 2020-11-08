@@ -99,14 +99,14 @@ void CTprintf(const char* format, ...) {
 		printf("\r%*s\r", (int)CTcmdbufUsed+(int)CTcmdpromtLen, "");
 		va_list args;
 		va_start(args, format);
-		size_t used = vprintf(format, args);
+		vprintf(format, args);
 		va_end(args);
 		printf("\n%s%s", CTcmdpromt, CTcmdbuf);
 		pthread_mutex_unlock(&CTiom);
 	} else {
 		va_list args;
 		va_start(args, format);
-		size_t used = vprintf(format, args);
+		vprintf(format, args);
 		va_end(args);
 	}
 	return;
@@ -160,7 +160,13 @@ int CTexit() {
 	return 0;
 }
 
-void* CTreader(void* a) {
+void* CTcommanderWrapper(void* arg) {
+	CTcommander((char*)arg);
+	pthread_exit(0);
+	return NULL;
+}
+
+void* CTreader(void*) {
 	while(1) {
 		switch(CTGetReaderControllState()) {
 			case 0:
@@ -171,13 +177,15 @@ void* CTreader(void* a) {
 						case '\n':
 						{
 							pthread_mutex_lock(&CTiom);
-							if(CTcommander != NULL) {
-								CTcommander(strdup(CTcmdbuf));
-							}
+							void* com = (void*)strdup(CTcmdbuf);
 							memset(CTcmdbuf, 0, CTcmdbufLen);
 							CTpromtupdateNM();
 							CTcmdbufUsed = 0;
 							pthread_mutex_unlock(&CTiom);
+							if(CTcommander != NULL) {
+								pthread_t CommanderThread;
+								pthread_create(&CommanderThread, NULL, &CTcommanderWrapper, com);
+							}
 						}
 						break;
 						case 127:

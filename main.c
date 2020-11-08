@@ -16,7 +16,7 @@ void commdr(char* command) {
 	return;
 }
 
-void *WorkerThreadFunction(void *a) {
+void *WorkerThreadFunction(void*) {
 	for(int i=0; ; i++) {
 		usleep(rand()%900000);
 		CTprintf("I'm random log string, blah. (%d)", i);
@@ -29,7 +29,7 @@ void *WorkerThreadFunction(void *a) {
 	return NULL;
 }
 
-int main(int argc, char **argv) {
+int main() {
 	CTinit(&commdr);
 	pthread_t WorkerThread;
 	pthread_create(&WorkerThread, NULL, &WorkerThreadFunction, NULL);
